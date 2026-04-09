@@ -5,8 +5,9 @@ set -euo pipefail
 # 1. Check local and remote environment.
 # 2. Sync local sources to the remote server.
 # 3. Run the remote Vivado batch build.
-# 4. Download the generated bitstream.
+# 4. Download the generated bitstream and logs.
 # 5. Program the locally connected FPGA with openFPGALoader.
+# 6. Generate a compact summary from the logs.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_NAME="$(basename "${PROJECT_ROOT}")"
@@ -24,6 +25,9 @@ FPGA_PART="${FPGA_PART:-xc7a35tfgg484-2}"
 BITSTREAM_NAME="${BITSTREAM_NAME:-${TOP_MODULE}.bit}"
 BIT_FILE="${BIT_FILE:-${PROJECT_ROOT}/build/${BITSTREAM_NAME}}"
 PROGRAMMER="${PROGRAMMER:-openFPGALoader}"
+LOCAL_VIVADO_LOG="${PROJECT_ROOT}/build/vivado.log"
+LOCAL_PROGRAM_LOG="${PROJECT_ROOT}/build/program.log"
+LOCAL_SUMMARY_FILE="${PROJECT_ROOT}/build/build_summary.txt"
 
 if [[ -t 1 ]]; then
     C_RESET=$'\033[0m'
@@ -111,6 +115,7 @@ ssh "${REMOTE_HOST}" "chmod +x '${REMOTE_PROJECT_DIR}/scripts/build.sh' && cd '$
 
 print_banner "STEP 5: FETCH BITSTREAM"
 scp "${REMOTE_HOST}:${REMOTE_PROJECT_DIR}/build/${BITSTREAM_NAME}" "${PROJECT_ROOT}/build/${BITSTREAM_NAME}"
+scp "${REMOTE_HOST}:${REMOTE_PROJECT_DIR}/build/vivado.log" "${LOCAL_VIVADO_LOG}"
 
 if [[ ! -f "${BIT_FILE}" ]]; then
     echo "Bitstream not found after fetch: ${BIT_FILE}" >&2
@@ -118,13 +123,28 @@ if [[ ! -f "${BIT_FILE}" ]]; then
 fi
 
 print_ok "Fetched bitstream: ${BIT_FILE}"
+print_ok "Fetched build log: ${LOCAL_VIVADO_LOG}"
 
 print_banner "STEP 6: DETECT FPGA DEVICE"
-"${PROGRAMMER}" --detect
+{
+    echo ">>> ${PROGRAMMER} --detect"
+    "${PROGRAMMER}" --detect
+} 2>&1 | tee "${LOCAL_PROGRAM_LOG}"
 
 print_banner "STEP 7: PROGRAM FPGA"
 print_info "Programming bitstream: ${BIT_FILE}"
-"${PROGRAMMER}" "${BIT_FILE}"
+{
+    echo
+    echo ">>> ${PROGRAMMER} ${BIT_FILE}"
+    "${PROGRAMMER}" "${BIT_FILE}"
+} 2>&1 | tee -a "${LOCAL_PROGRAM_LOG}"
+
+print_banner "STEP 8: GENERATE LOG SUMMARY"
+"${SCRIPT_DIR}/extract_log_summary.sh" \
+    "${LOCAL_VIVADO_LOG}" \
+    "${LOCAL_PROGRAM_LOG}" \
+    "${LOCAL_SUMMARY_FILE}"
+print_ok "Generated summary: ${LOCAL_SUMMARY_FILE}"
 
 print_banner "DONE"
 print_ok "Build, fetch, and programming completed successfully."

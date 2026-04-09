@@ -19,6 +19,7 @@ mkdir -p "${TARGET_DIR}/rtl" "${TARGET_DIR}/constr" "${TARGET_DIR}/scripts" "${T
 cp "${SOURCE_ROOT}/scripts/build.tcl" "${TARGET_DIR}/scripts/build.tcl"
 cp "${SOURCE_ROOT}/scripts/build.sh" "${TARGET_DIR}/scripts/build.sh"
 cp "${SOURCE_ROOT}/scripts/build_and_program.sh" "${TARGET_DIR}/scripts/build_and_program.sh"
+cp "${SOURCE_ROOT}/scripts/extract_log_summary.sh" "${TARGET_DIR}/scripts/extract_log_summary.sh"
 cp "${SOURCE_ROOT}/.vscode/tasks.json" "${TARGET_DIR}/.vscode/tasks.json"
 cp "${SOURCE_ROOT}/.vscode/launch.json" "${TARGET_DIR}/.vscode/launch.json"
 
@@ -26,7 +27,10 @@ if [[ ! -f "${TARGET_DIR}/fpga.env" ]]; then
     cp "${SOURCE_ROOT}/fpga.env" "${TARGET_DIR}/fpga.env"
 fi
 
-chmod +x "${TARGET_DIR}/scripts/build.sh" "${TARGET_DIR}/scripts/build_and_program.sh"
+chmod +x \
+    "${TARGET_DIR}/scripts/build.sh" \
+    "${TARGET_DIR}/scripts/build_and_program.sh" \
+    "${TARGET_DIR}/scripts/extract_log_summary.sh"
 
 echo "Initialized FPGA workflow in: ${TARGET_DIR}"
 echo "Next: edit ${TARGET_DIR}/fpga.env, then add your rtl/ and constr/ files."

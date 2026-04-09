@@ -26,5 +26,7 @@ if [[ ! -f "${VIVADO_SETTINGS}" ]]; then
 fi
 
 cd "${PROJECT_ROOT}"
+mkdir -p build
 source "${VIVADO_SETTINGS}"
-vivado -mode batch -source scripts/build.tcl
+vivado -mode batch -source scripts/build.tcl 2>&1 | tee build/vivado.log
+exit "${PIPESTATUS[0]}"
