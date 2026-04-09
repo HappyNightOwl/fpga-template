@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Build + Program",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "/bin/bash",
+      "args": [
+        "${workspaceFolder}/scripts/build_and_program.sh"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}
