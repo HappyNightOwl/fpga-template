@@ -7,6 +7,11 @@
 3. 在远端通过 Vivado batch 模式生成 bitstream。
 4. 将 bitstream 下载回本地。
 5. 在本地使用 `openFPGALoader` 给 FPGA 板烧录。
+## 硬件配置
+本项目针对《数字逻辑与处理器基础实验》采用的开发板WELOG1（型号为`xc7a35tfgg484-2`）开发。我的硬件配置为14英寸Macbookpro(M5)和贝尔金拓展坞，理论上任何不太老的mac电脑都可以正常使用。
+
+![](assets/README_7B47246B-E671-44EC-B12F-CFC0BB6A274A.jpeg)
+
 
 ## 安装与使用
 
@@ -150,12 +155,3 @@ sudo chmod -R 2775 /mnt/data/fpga
 
 `/mnt/data/fpga/<当前文件夹名>`
 
-## 复用模板
-
-你可以把这个仓库克隆到其他地方，然后执行：
-
-```bash
-./scripts/init_project.sh /path/to/new_project
-```
-
-这会创建一个新的工程目录，并自动生成同样的 workflow 文件。
