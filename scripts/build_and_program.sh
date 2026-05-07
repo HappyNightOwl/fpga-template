@@ -25,6 +25,7 @@ FPGA_PART="${FPGA_PART:-xc7a35tfgg484-2}"
 BITSTREAM_NAME="${BITSTREAM_NAME:-${TOP_MODULE}.bit}"
 BIT_FILE="${BIT_FILE:-${PROJECT_ROOT}/build/${BITSTREAM_NAME}}"
 PROGRAMMER="${PROGRAMMER:-openFPGALoader}"
+PROGRAMMER_ARGS="${PROGRAMMER_ARGS:-}"
 LOCAL_VIVADO_LOG="${PROJECT_ROOT}/build/vivado.log"
 LOCAL_PROGRAM_LOG="${PROJECT_ROOT}/build/program.log"
 LOCAL_SUMMARY_FILE="${PROJECT_ROOT}/build/build_summary.txt"
@@ -69,7 +70,7 @@ check_local_cmd() {
 }
 
 print_banner "STEP 1: CHECK LOCAL TOOLS"
-check_local_cmd "${PROGRAMMER}"
+check_local_cmd "${PROGRAMMER%% *}"
 check_local_cmd rsync
 check_local_cmd scp
 check_local_cmd ssh
@@ -127,16 +128,16 @@ print_ok "Fetched build log: ${LOCAL_VIVADO_LOG}"
 
 print_banner "STEP 6: DETECT FPGA DEVICE"
 {
-    echo ">>> ${PROGRAMMER} --detect"
-    "${PROGRAMMER}" --detect
+    echo ">>> ${PROGRAMMER} ${PROGRAMMER_ARGS} --detect"
+    ${PROGRAMMER} ${PROGRAMMER_ARGS} --detect
 } 2>&1 | tee "${LOCAL_PROGRAM_LOG}"
 
 print_banner "STEP 7: PROGRAM FPGA"
 print_info "Programming bitstream: ${BIT_FILE}"
 {
     echo
-    echo ">>> ${PROGRAMMER} ${BIT_FILE}"
-    "${PROGRAMMER}" "${BIT_FILE}"
+    echo ">>> ${PROGRAMMER} ${PROGRAMMER_ARGS} ${BIT_FILE}"
+    ${PROGRAMMER} ${PROGRAMMER_ARGS} "${BIT_FILE}"
 } 2>&1 | tee -a "${LOCAL_PROGRAM_LOG}"
 
 print_banner "STEP 8: GENERATE LOG SUMMARY"
